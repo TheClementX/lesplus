@@ -1,18 +1,24 @@
 #include "common.h"
 //TODO add sigint handling
 
+//file descriptors
+int tunfd, clifd, e; 
+char* name = NULL; 
+
 int init_tun(char* name); 
 void tun_up(char* name); 
 void tun_down(char* name); 
 int init_cli(char* ip, int port); 
 
+void handle_sigint(int sig); 
+
 int main(int argc, char* argv[]) {
+	signal(SIGINT, handle_sigint); 
+
 	if(argc != 3) 
 		exit(EXIT_FAILURE); 
 
-	int tunfd, clifd, e; 
 	int port = atoi(argv[2]); 
-	char* name = NULL; 
 	tunfd = init_tun(name); tun_up(name); 
 	fprintf(stdout, "TUN init succesful\n"); 
 	clifd = init_cli(argv[1], port); 
@@ -131,4 +137,10 @@ int init_cli(char* ip, int port) {
 		err("connect() to vpn failed\n"); 
 
 	return clifd; 
+}
+
+void handle_sigint(int sig) {
+	tun_down(name); 	
+	close(tunfd); 
+	close(clifd); 
 }
