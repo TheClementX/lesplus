@@ -1,6 +1,6 @@
 #include "common.h"
 
-int tunfd, servfd, clifd, e; 
+int tunfd = -1, servfd = -1, clifd = -1, e; 
 char name[IFNAMSIZ] = {0}; 
 
 int init_tun(char* name); 
