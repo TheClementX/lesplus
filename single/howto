@@ -1,0 +1,10 @@
+ABSTRACT
+a TUN is an interface for capturing the raw IP packets of your machine.
+On the client side, the TUN will intercept any IP packets being sent out
+and make them available to your client program to send to you VPN. 
+On the server side, the server recieves raw IP packets over TCP or UDP
+and writes them to its TUN which routes them to its final destination. 
+the response from the destination is then sent to the server TUN to be read and send back to the client over TCP/UDP. When the client socket recieves
+its raw packet, it writes it back to the tun which routes it back to the 
+proper program. The TUN is capable of routing packets into your own device
+and out to a network depending on the IP header of the packet. 
