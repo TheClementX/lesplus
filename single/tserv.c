@@ -157,16 +157,16 @@ int init_server(int port) {
 	saddr.sin_addr.s_addr = INADDR_ANY; 
 	saddr.sin_port = htons(port); 
 	
-	fd = socket(AF_INET, SOCK_STREAM, 0) ; 
+	fd = socket(AF_INET, SOCK_STREAM, 0); 
 	if(fd < 0)
 		err("server socket init failed\n"); 
-	e = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt); 
+	e = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)); 
 	if(e < 0)
 		err("setsockopt failed for server\n"); 
 	e = bind(fd, (struct sockaddr*) &saddr, saddr_len); 
 	if(e < 0)
 		err("server bind failed\n"); 
-	e = listen(fd, 1)
+	e = listen(fd, 1); 
 	if(e < 0)
 		err("listen failed\n"); 
 

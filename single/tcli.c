@@ -136,7 +136,7 @@ int init_cli(char* ip, int port) {
 	clifd = socket(AF_INET, SOCK_STREAM, 0); 
 	if(clifd < 0)
 		err("clifd socket() failed\n"); 
-	e = connect(clifd, (struct sockaddr*) &saddr, sizeof(saddr))); 
+	e = connect(clifd, (struct sockaddr*) &saddr, sizeof(saddr)); 
 	if(e < 0)
 		err("connect() to vpn failed\n"); 
 
