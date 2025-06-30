@@ -1,19 +1,23 @@
 #include "common.h"
 
+int tunfd, servfd, clifd, e; 
+char name[IFNAMSIZ] = {0}; 
+
 int init_tun(char* name); 
 void tun_up(char* name); 
 void tun_down(char* name); 
 int init_server(); 
 
+void handle_sigint(int sig); 
+
 int main(int argc, char* argv[]) {
+	signal(SIGINT, handle_sigint); 
 	//arg check
 	if(argc != 2) 
 		exit(EXIT_FAILURE); 
 
 	//initialize fds
-	int tunfd, servfd, clifd, e; 
 	int port = atoi(argv[1]); 
-	char* name = NULL; 
 	tunfd = init_tun(name); tun_up(name); 
 	fprintf(stdout, "TUN init succesful\n"); 
 	servfd = init_server(port); 
@@ -57,7 +61,7 @@ int main(int argc, char* argv[]) {
 			write(tunfd, &bbuf, e); 
 			memset(&bbuf, 0, MTU); 
 		}
-		if(pfds[1].revents & POLLIN) {
+		if(pfds[0].revents & POLLIN) {
 			e = read(tunfd, &bbuf, MTU); 
 			send(clifd, &bbuf, e, 0); 
 			memset(&bbuf, 0, MTU); 
@@ -76,11 +80,11 @@ int init_tun(char* name) {
 	char* clone = "/dev/net/tun"; 
 	memset(&ifr, 0, sizeof(ifr)); 
 
-	if(fd = open(clone, O_RDWR) < 0)
+	fd = open(clone, O_RDWR); 
+	if(fd < 0)
 		err("tun open failed"); 
 
 	if(name != NULL) strcpy(ifr.ifr_name, name); 
-	else strcpy(ifr.ifr_name, "\0"); 
 	ifr.ifr_flags = IFF_TUN | IFF_NO_PI; 
 
 	e = ioctl(fd, TUNSETIFF, (void*)&ifr); 
@@ -153,14 +157,25 @@ int init_server(int port) {
 	saddr.sin_addr.s_addr = INADDR_ANY; 
 	saddr.sin_port = htons(port); 
 	
-	if(fd = socket(AF_INET, SOCK_STREAM, 0) < 0)
+	fd = socket(AF_INET, SOCK_STREAM, 0) ; 
+	if(fd < 0)
 		err("server socket init failed\n"); 
-	if(e = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) < 0))
+	e = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt); 
+	if(e < 0)
 		err("setsockopt failed for server\n"); 
-	if(e = bind(fd, (struct sockaddr*) &saddr, saddr_len) < 0)
+	e = bind(fd, (struct sockaddr*) &saddr, saddr_len); 
+	if(e < 0)
 		err("server bind failed\n"); 
-	if(e = listen(fd, 1) < 0)
+	e = listen(fd, 1)
+	if(e < 0)
 		err("listen failed\n"); 
 
 	return fd; 
+}
+
+void handle_sigint(int sig) {
+	tun_down(name); 
+	close(tunfd); 
+	close(servfd); close(clifd); 
+	exit(0); 
 }

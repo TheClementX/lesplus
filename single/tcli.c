@@ -2,8 +2,8 @@
 //TODO add sigint handling
 
 //file descriptors
-int tunfd, clifd, e; 
-char* name = NULL; 
+int tunfd = -1, clifd = -1, e; 
+char name[IFNAMSIZ] = {0}; 
 
 int init_tun(char* name); 
 void tun_up(char* name); 
@@ -64,11 +64,11 @@ int init_tun(char* name) {
 	char* clone = "/dev/net/tun"; 
 	memset(&ifr, 0, sizeof(ifr)); 
 	
-	if(fd = open(clone, O_RDWR) < 0)
+	fd = open(clone, O_RDWR); 
+	if(fd < 0)
 		err("tun open failed"); 
 
 	if(name != NULL) strcpy(ifr.ifr_name, name); 
-	else strcpy(ifr.ifr_name, "\0"); 
 	ifr.ifr_flags = IFF_TUN | IFF_NO_PI; 
 
 	e = ioctl(fd, TUNSETIFF, (void*)&ifr); 
@@ -128,12 +128,16 @@ int init_cli(char* ip, int port) {
 	memset(&saddr, 0, sizeof(saddr)); 
 	saddr.sin_family = AF_INET; 
 	saddr.sin_port = htons(port); 
-	if(e = inet_pton(AF_INET, ip, &saddr.sin_addr) < 0)
+
+	e = inet_pton(AF_INET, ip, &saddr.sin_addr) ; 
+	if(e < 0)
 		err("inet_pton failed\n"); 
 
-	if(clifd = socket(AF_INET, SOCK_STREAM, 0) < 0)
+	clifd = socket(AF_INET, SOCK_STREAM, 0); 
+	if(clifd < 0)
 		err("clifd socket() failed\n"); 
-	if(e = connect(clifd, (struct sockaddr*) &saddr, sizeof(saddr)) < 0)
+	e = connect(clifd, (struct sockaddr*) &saddr, sizeof(saddr))); 
+	if(e < 0)
 		err("connect() to vpn failed\n"); 
 
 	return clifd; 
@@ -143,4 +147,5 @@ void handle_sigint(int sig) {
 	tun_down(name); 	
 	close(tunfd); 
 	close(clifd); 
+	exit(0); 
 }
