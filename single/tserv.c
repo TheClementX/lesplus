@@ -141,6 +141,8 @@ void tun_down(char* name) {
 	system(cmd); memset(&cmd, 0, 1024); 
 	snprintf(cmd, 1024, "ip link set %s down", name); 
 	system(cmd); memset(&cmd, 0, 1024); 
+	snprintf(cmd, 1024, "ip link delete %s", name); 
+	system(cmd); memset(&cmd, 0, 1024); 
 
 	//disbale masquerading
 	system("iptables -t nat -D POSTROUTING -o wlp3s0 -j MASQUERADE"); 

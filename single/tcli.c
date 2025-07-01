@@ -12,6 +12,7 @@ int init_cli(char* ip, int port);
 
 void handle_sigint(int sig); 
 
+//argv[1] = IP argv[2] = Port 
 int main(int argc, char* argv[]) {
 	signal(SIGINT, handle_sigint); 
 
@@ -119,6 +120,8 @@ void tun_down(char* name) {
 
 	snprintf(cmd, 1024, "ip link set %s down", name); 
 	system(cmd); memset(&cmd, 0, 1024); 
+	snprintf(cmd, 1024, "ip link delete %s", name); 
+	system(cmd); memset(&cmd, 0, 1024); 
 }
 
 
@@ -129,8 +132,9 @@ int init_cli(char* ip, int port) {
 	saddr.sin_family = AF_INET; 
 	saddr.sin_port = htons(port); 
 
+	fprintf(stdout, "Connecting to IP: %s", ip); 
 	e = inet_pton(AF_INET, ip, &saddr.sin_addr) ; 
-	if(e < 0)
+	if(e <= 0)
 		err("inet_pton failed\n"); 
 
 	clifd = socket(AF_INET, SOCK_STREAM, 0); 
